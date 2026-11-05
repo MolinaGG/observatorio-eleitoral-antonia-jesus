@@ -100,6 +100,19 @@ create table if not exists resumo_preliminar (
   unique nulls not distinct (ano, cargo, municipio)
 );
 
+create table if not exists benchmark_resultados (
+  eleicao_id bigint not null references eleicoes(id),
+  sq_candidato bigint not null,
+  nome_urna text not null,
+  numero integer not null,
+  partido text not null,
+  votos integer not null check (votos >= 0),
+  resultado text,
+  fonte_id bigint not null references fontes_tse(id),
+  primary key (eleicao_id, sq_candidato)
+);
+create index if not exists benchmark_votos on benchmark_resultados (eleicao_id, votos desc);
+
 -- Auditoria essencial antes de publicar: a soma por zona deve conferir com
 -- o total oficial; a soma por seção deve conferir com a soma por zona.
 -- A vice-prefeitura em 2024 registra voto de chapa, sem comparação de
