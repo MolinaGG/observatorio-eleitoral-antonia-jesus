@@ -87,6 +87,19 @@ create index if not exists votos_zona_eleicao_local on votos_zona (eleicao_id, m
 create index if not exists votos_secao_eleicao_local on votos_secao (eleicao_id, municipio_tse, zona, secao);
 create index if not exists candidaturas_benchmark on candidaturas (eleicao_id, partido, numero);
 
+-- Prévia secundária em tabela distinta. Nunca promover a TSE conciliado sem
+-- conferir os arquivos oficiais e seus totais em cada nível de agregação.
+create table if not exists resumo_preliminar (
+  ano integer not null,
+  cargo text not null,
+  municipio text,
+  votos integer not null check (votos >= 0),
+  fonte_url text not null,
+  status_validacao text not null check (status_validacao in ('secundaria_pendente_tse', 'tse_conciliado')),
+  registrado_em timestamptz not null default now(),
+  unique nulls not distinct (ano, cargo, municipio)
+);
+
 -- Auditoria essencial antes de publicar: a soma por zona deve conferir com
 -- o total oficial; a soma por seção deve conferir com a soma por zona.
 -- A vice-prefeitura em 2024 registra voto de chapa, sem comparação de
